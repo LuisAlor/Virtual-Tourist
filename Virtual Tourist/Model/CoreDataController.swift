@@ -10,13 +10,15 @@ import Foundation
 import CoreData
 
 class CoreDataController {
+    
+    static let shared = CoreDataController(modelName: "Virtual_Tourist")
         
     //Properties
     let persistentContainer: NSPersistentContainer!
     var backgroundContext: NSManagedObjectContext!
     
     //Initialize the persistent container with modelname
-    init(modelName: String) {
+    private init(modelName: String) {
         persistentContainer = NSPersistentContainer(name: modelName)
     }
     
@@ -51,7 +53,6 @@ class CoreDataController {
             //Auto save contexts
             self.autoSaveViewContext()
         }
-        
     }
 }
 
@@ -70,5 +71,9 @@ extension CoreDataController {
         DispatchQueue.main.asyncAfter(deadline: .now() + interval){
             self.autoSaveViewContext(interval: interval)
         }
+    }
+    
+    func saveViewContext(){
+        try? viewContext.save()
     }
 }

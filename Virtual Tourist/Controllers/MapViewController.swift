@@ -8,14 +8,14 @@
 
 import UIKit
 import MapKit
+import CoreData
 
-class MapViewController: UIViewController, UIGestureRecognizerDelegate {
+class MapViewController: UIViewController, UIGestureRecognizerDelegate, NSFetchedResultsControllerDelegate {
     
     //IBOutlets
     @IBOutlet weak var mapView: MKMapView!
     
-    //Data Controller Injected to MapViewController
-    var coreDataController: CoreDataController!
+    var fetchedResultsController: NSFetchedResultsController<Pin>!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -29,7 +29,19 @@ class MapViewController: UIViewController, UIGestureRecognizerDelegate {
         mapView.addGestureRecognizer(gestureRecognizer)
         //Set gestureRecognizer delegate to MapViewController
         gestureRecognizer.delegate = self
+        
+        let fetchRequest: NSFetchRequest<Pin> = Pin.fetchRequest()
 
+        fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: CoreDataController.shared.viewContext, sectionNameKeyPath: nil, cacheName: nil)
+        
+        fetchedResultsController.delegate = self
+        
+        do {
+            try fetchedResultsController.performFetch()
+        }
+        catch{
+            print("Error in fecthing")
+        }
     }
     ///Handles tap gestures and generatea an annotation on the MapView.
     @objc func handleTapGesture(_ gestureRecognizer: UILongPressGestureRecognizer){
@@ -42,13 +54,12 @@ class MapViewController: UIViewController, UIGestureRecognizerDelegate {
             annotation.coordinate = coordinate
             self.mapView.addAnnotation(annotation)
             
-            FlickrClient.flickrGETSearchPhotos(lat: coordinate.latitude, lon: coordinate.longitude) { (Photos, error) in
-                print(Photos)
-            }
-            
+            let pin = Pin(context: CoreDataController.shared.viewContext)
+            pin.latitude = coordinate.latitude.magnitude
+            pin.longitude = coordinate.longitude.magnitude
+            CoreDataController.shared.saveViewContext()
         }
     }
-
 }
 //MARK: - MKMapViewDelegate
 extension MapViewController: MKMapViewDelegate{
@@ -73,10 +84,7 @@ extension MapViewController: MKMapViewDelegate{
     }
     
     func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
-        let photoAlbumViewController = storyboard?.instantiateViewController(identifier: "PhotoAlbumViewController") as! PhotoAlbumViewController
-        photoAlbumViewController.coreDataController = coreDataController
+        //TO DO
     }
-    
-    
 }
 

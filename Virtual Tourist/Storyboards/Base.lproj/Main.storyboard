@@ -51,10 +51,10 @@
                                 <rect key="frame" x="0.0" y="88" width="414" height="734"/>
                                 <subviews>
                                     <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" mapType="standard" translatesAutoresizingMaskIntoConstraints="NO" id="7JO-ix-qKS">
-                                        <rect key="frame" x="20" y="0.0" width="374" height="312.5"/>
+                                        <rect key="frame" x="20" y="0.0" width="374" height="309"/>
                                     </mapView>
                                     <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="Hcj-2N-duM">
-                                        <rect key="frame" x="20" y="353.5" width="374" height="316"/>
+                                        <rect key="frame" x="20" y="350" width="374" height="313"/>
                                         <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
                                         <collectionViewFlowLayout key="collectionViewLayout" automaticEstimatedItemSize="YES" minimumLineSpacing="10" minimumInteritemSpacing="10" id="BWF-B0-Oio">
                                             <size key="itemSize" width="128" height="128"/>
@@ -74,7 +74,7 @@
                                         </cells>
                                     </collectionView>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="KBg-1a-xvg">
-                                        <rect key="frame" x="184" y="710.5" width="46" height="23.5"/>
+                                        <rect key="frame" x="184" y="704" width="46" height="30"/>
                                         <state key="normal" title="Button"/>
                                     </button>
                                 </subviews>
@@ -103,6 +103,9 @@
                         <rect key="frame" x="0.0" y="44" width="414" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
+                    <toolbar key="toolbar" opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="zbt-q5-tmQ">
+                        <autoresizingMask key="autoresizingMask"/>
+                    </toolbar>
                     <connections>
                         <segue destination="BYZ-38-t0r" kind="relationship" relationship="rootViewController" id="pTR-oF-LBg"/>
                     </connections>
