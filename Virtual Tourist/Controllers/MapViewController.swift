@@ -31,6 +31,9 @@ class MapViewController: UIViewController, UIGestureRecognizerDelegate, NSFetche
         gestureRecognizer.delegate = self
         
         let fetchRequest: NSFetchRequest<Pin> = Pin.fetchRequest()
+        
+        let sortDescriptor = NSSortDescriptor(key: "latitude", ascending: false)
+        fetchRequest.sortDescriptors = [sortDescriptor]
 
         fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: CoreDataController.shared.viewContext, sectionNameKeyPath: nil, cacheName: nil)
         
@@ -42,6 +45,11 @@ class MapViewController: UIViewController, UIGestureRecognizerDelegate, NSFetche
         catch{
             print("Error in fecthing")
         }
+        
+        if let pins = fetchedResultsController.fetchedObjects{
+            generateAnnotations(pins)
+        }
+        
     }
     ///Handles tap gestures and generatea an annotation on the MapView.
     @objc func handleTapGesture(_ gestureRecognizer: UILongPressGestureRecognizer){
@@ -60,6 +68,31 @@ class MapViewController: UIViewController, UIGestureRecognizerDelegate, NSFetche
             CoreDataController.shared.saveViewContext()
         }
     }
+    
+    //MARK: - generateAnnotations: Generate all the annotations from the StudentsLocation Data
+    func generateAnnotations(_ pins: [Pin]){
+        
+        var annotations = [MKPointAnnotation]()
+               
+        for pin in pins {
+           
+            let lat = CLLocationDegrees(pin.latitude)
+            let long = CLLocationDegrees(pin.longitude)
+           
+            // The lat and long to create a CLLocationCoordinates2D instance.
+            let coordinate = CLLocationCoordinate2D(latitude: lat, longitude: long)
+           
+            // Here we create the annotation and set its coordiate, title, and subtitle properties
+            let annotation = MKPointAnnotation()
+            annotation.coordinate = coordinate
+           
+            // Place the annotation in an array of annotations.
+            annotations.append(annotation)
+        }
+        // When the array is complete, add the annotations to the map.
+        self.mapView.addAnnotations(annotations)
+    }
+    
 }
 //MARK: - MKMapViewDelegate
 extension MapViewController: MKMapViewDelegate{
