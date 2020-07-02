@@ -14,7 +14,7 @@ enum GetFlickrAPIKeys {
     case apiKey
     case secretKey
     
-    //Private computed property for getting the keys from property list
+    /// Private computed property for getting the keys inside user's property list PList
     private var getKeys: FlickrKeys? {
         
         guard let url = Bundle.main.url(forResource: "FlickrKeys", withExtension: "plist") else { return nil }
@@ -31,7 +31,7 @@ enum GetFlickrAPIKeys {
             return nil
         }
     }
-    //Get the API Key stored from PList
+    /// Returns the API Key stored in user's PList
     public var getApiKey: String{
         if let apiKey = getKeys?.apiKey{
             return apiKey
@@ -39,7 +39,7 @@ enum GetFlickrAPIKeys {
             return ""
         }
     }
-    //Get the Secret Key stored from PList
+    /// Returns the secret key stored in user's PList
     public var getSecretKey: String{
         if let secretKey = getKeys?.secretKey{
             return secretKey

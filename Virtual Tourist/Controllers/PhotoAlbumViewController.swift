@@ -9,11 +9,13 @@
 import UIKit
 
 class PhotoAlbumViewController: UIViewController {
+    
+    //Data Controller Injected to PhotoAlbumViewController
+    var coreDataController: CoreDataController!
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        // Do any additional setup after loading the view.
     }
 
 }

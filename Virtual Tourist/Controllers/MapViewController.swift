@@ -14,6 +14,9 @@ class MapViewController: UIViewController, UIGestureRecognizerDelegate {
     //IBOutlets
     @IBOutlet weak var mapView: MKMapView!
     
+    //Data Controller Injected to MapViewController
+    var coreDataController: CoreDataController!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -21,9 +24,7 @@ class MapViewController: UIViewController, UIGestureRecognizerDelegate {
         self.mapView.delegate = self
         
         //Create a UITapGestureRecognizer
-        let gestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(handleTapGesture(_:)))
-        //Only one tap required to trigger pin drop
-        gestureRecognizer.numberOfTapsRequired = 1
+        let gestureRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(handleTapGesture(_:)))
         //Add gestureRecognizer to the mapView
         mapView.addGestureRecognizer(gestureRecognizer)
         //Set gestureRecognizer delegate to MapViewController
@@ -31,16 +32,20 @@ class MapViewController: UIViewController, UIGestureRecognizerDelegate {
 
     }
     ///Handles tap gestures and generatea an annotation on the MapView.
-    @objc func handleTapGesture(_ gestureRecognizer: UITapGestureRecognizer){
-        
-        let location = gestureRecognizer.location(in: self.mapView)
-        let coordinate = mapView.convert(location, toCoordinateFrom: self.mapView)
-        
+    @objc func handleTapGesture(_ gestureRecognizer: UILongPressGestureRecognizer){
         if gestureRecognizer.state == .ended {
+            let location = gestureRecognizer.location(in: self.mapView)
+            let coordinate = mapView.convert(location, toCoordinateFrom: self.mapView)
+        
             // Add annotation:
             let annotation = MKPointAnnotation()
             annotation.coordinate = coordinate
             self.mapView.addAnnotation(annotation)
+            
+            FlickrClient.flickrGETSearchPhotos(lat: coordinate.latitude, lon: coordinate.longitude) { (Photos, error) in
+                print(Photos)
+            }
+            
         }
     }
 
@@ -67,8 +72,10 @@ extension MapViewController: MKMapViewDelegate{
         return pinView
     }
     
-    func mapView(_ mapView: MKMapView, annotationView view: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
-        //Do something
+    func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
+        let photoAlbumViewController = storyboard?.instantiateViewController(identifier: "PhotoAlbumViewController") as! PhotoAlbumViewController
+        photoAlbumViewController.coreDataController = coreDataController
+        performSegue(withIdentifier: "SegueToPhotoAlbumViewController", sender: self)
     }
     
     
