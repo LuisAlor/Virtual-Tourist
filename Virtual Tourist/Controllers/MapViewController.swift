@@ -56,15 +56,15 @@ class MapViewController: UIViewController, UIGestureRecognizerDelegate, NSFetche
         if gestureRecognizer.state == .ended {
             let location = gestureRecognizer.location(in: self.mapView)
             let coordinate = mapView.convert(location, toCoordinateFrom: self.mapView)
-        
+
             // Add annotation:
             let annotation = MKPointAnnotation()
             annotation.coordinate = coordinate
             self.mapView.addAnnotation(annotation)
             
             let pin = Pin(context: CoreDataController.shared.viewContext)
-            pin.latitude = coordinate.latitude.magnitude
-            pin.longitude = coordinate.longitude.magnitude
+            pin.latitude = coordinate.latitude
+            pin.longitude = coordinate.longitude
             CoreDataController.shared.saveViewContext()
         }
     }
@@ -78,10 +78,10 @@ class MapViewController: UIViewController, UIGestureRecognizerDelegate, NSFetche
            
             let lat = CLLocationDegrees(pin.latitude)
             let long = CLLocationDegrees(pin.longitude)
-           
+                       
             // The lat and long to create a CLLocationCoordinates2D instance.
             let coordinate = CLLocationCoordinate2D(latitude: lat, longitude: long)
-           
+                       
             // Here we create the annotation and set its coordiate, title, and subtitle properties
             let annotation = MKPointAnnotation()
             annotation.coordinate = coordinate
