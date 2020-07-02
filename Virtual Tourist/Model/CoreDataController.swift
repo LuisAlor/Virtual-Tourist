@@ -10,7 +10,7 @@ import Foundation
 import CoreData
 
 class CoreDataController {
-    
+        
     //Properties
     let persistentContainer: NSPersistentContainer!
     var backgroundContext: NSManagedObjectContext!
@@ -71,5 +71,4 @@ extension CoreDataController {
             self.autoSaveViewContext(interval: interval)
         }
     }
-    
 }

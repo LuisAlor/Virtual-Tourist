@@ -75,7 +75,6 @@ extension MapViewController: MKMapViewDelegate{
     func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
         let photoAlbumViewController = storyboard?.instantiateViewController(identifier: "PhotoAlbumViewController") as! PhotoAlbumViewController
         photoAlbumViewController.coreDataController = coreDataController
-        performSegue(withIdentifier: "SegueToPhotoAlbumViewController", sender: self)
     }
     
     

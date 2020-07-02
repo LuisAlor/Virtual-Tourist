@@ -11,19 +11,7 @@ import UIKit
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
     
-    var window: UIWindow?
-        
-    //Initialize the coreData Controller
-    let coreDataController = CoreDataController(modelName: "Virtual_Tourist")
-    
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        
-        //Load the persistent store upon launch
-        coreDataController.load()
-        
-        let navigationController = window?.rootViewController as! UINavigationController
-        let mapViewController = navigationController.topViewController as! MapViewController
-        mapViewController.coreDataController = coreDataController
             
         return true
     }
@@ -45,12 +33,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func applicationWillTerminate(_ application: UIApplication) {
         // Called when the application is about to terminate. Save data if appropriate.
         saveViewContext()
-    }
-
-    
-    /// Saves our viewContext
-    func saveViewContext(){
-        try? coreDataController.viewContext.save()
     }
     
 }
