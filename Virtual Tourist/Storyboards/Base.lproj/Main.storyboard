@@ -74,8 +74,8 @@
                                         </cells>
                                     </collectionView>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="KBg-1a-xvg">
-                                        <rect key="frame" x="184" y="704" width="46" height="30"/>
-                                        <state key="normal" title="Button"/>
+                                        <rect key="frame" x="155" y="704" width="104" height="30"/>
+                                        <state key="normal" title="New Collection"/>
                                     </button>
                                 </subviews>
                             </stackView>
