@@ -19,8 +19,8 @@ class MapViewController: UIViewController, UIGestureRecognizerDelegate, NSFetche
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        setupMapView()
         setUpFetchedResultsController()
+        setupMapView()
     }
     
     fileprivate func setupMapView() {
@@ -32,9 +32,10 @@ class MapViewController: UIViewController, UIGestureRecognizerDelegate, NSFetche
         mapView.addGestureRecognizer(gestureRecognizer)
         //Set gestureRecognizer delegate to MapViewController
         gestureRecognizer.delegate = self
-        //Check if there is a mapUserRegion saved in UserDefaults, if so set to mapView
-        if let region = getMapRegion() {
+        //Check if there is a mapUserRegion saved in UserDefaults and if there are pins stored generate the corresponding annotations
+        if let region = getMapRegion(), let pins = fetchedResultsController.fetchedObjects {
             mapView.setRegion(region, animated: true)
+            generateAnnotations(pins)
         }
     }
     
@@ -54,10 +55,6 @@ class MapViewController: UIViewController, UIGestureRecognizerDelegate, NSFetche
         }
         catch{
             print("Error in fecthing")
-        }
-        //TO-DO : Move somewhere else
-        if let pins = fetchedResultsController.fetchedObjects{
-            generateAnnotations(pins)
         }
     }
     
@@ -79,6 +76,7 @@ class MapViewController: UIViewController, UIGestureRecognizerDelegate, NSFetche
         }
     }
     
+    ///Gets the user's map region if exists in UserDefaults database
     func getMapRegion() -> MKCoordinateRegion? {
         if let userMapRegion = UserDefaults.standard.dictionary(forKey: "userMapRegion"){
             let userCenter = CLLocationCoordinate2D(latitude: userMapRegion["latitude"] as! CLLocationDegrees, longitude: userMapRegion["longitude"] as! CLLocationDegrees)
@@ -88,7 +86,7 @@ class MapViewController: UIViewController, UIGestureRecognizerDelegate, NSFetche
         return nil
     }
     
-    /// generateAnnotations: Generates all the annotations from saved Pins
+    ///Generates all the annotations from saved Pins
     func generateAnnotations(_ pins: [Pin]){
         
         var annotations = [MKPointAnnotation]()
@@ -112,6 +110,16 @@ class MapViewController: UIViewController, UIGestureRecognizerDelegate, NSFetche
         self.mapView.addAnnotations(annotations)
     }
     
+    /// Saves user current  center and span to UserDefaults database
+    func saveUserRegion(_ mapRegion: MKCoordinateRegion?){
+        if let mapRegion = mapRegion {
+            let userMapRegion = ["latitude": mapRegion.center.latitude,
+                                 "longitude": mapRegion.center.longitude,
+                                 "delta_latitude": mapRegion.span.latitudeDelta,
+                                 "delta_longitude": mapRegion.span.longitudeDelta]
+            UserDefaults.standard.set(userMapRegion, forKey: "userMapRegion")
+        }
+    }
 }
 //MARK: - MKMapViewDelegate
 extension MapViewController: MKMapViewDelegate{
@@ -136,21 +144,14 @@ extension MapViewController: MKMapViewDelegate{
     }
     
     func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
-        //TO DO
+        let photoAlbumViewController = UIStoryboard.init(name: "Main", bundle: Bundle.main).instantiateViewController(withIdentifier: "PhotoAlbumViewController") as! PhotoAlbumViewController
+        self.navigationController?.pushViewController(photoAlbumViewController, animated: true)
     }
-    
+
     func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
+        //If the region changed then save this to keep data persistent.
         saveUserRegion(mapView.region)
     }
-    
-    func saveUserRegion(_ mapRegion: MKCoordinateRegion?){
-        if let mapRegion = mapRegion {
-            let userMapRegion = ["latitude": mapRegion.center.latitude,
-                                 "longitude": mapRegion.center.longitude,
-                                 "delta_latitude": mapRegion.span.latitudeDelta,
-                                 "delta_longitude": mapRegion.span.longitudeDelta]
-            UserDefaults.standard.set(userMapRegion, forKey: "userMapRegion")
-        }
-    }
+
 }
 
