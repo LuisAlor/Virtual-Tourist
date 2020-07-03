@@ -144,6 +144,8 @@ extension MapViewController: MKMapViewDelegate{
     }
     
     func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
+        //Deselect the actual annotation for being able to select it after pressing back.
+        mapView.deselectAnnotation(view.annotation, animated: true)
         let photoAlbumViewController = UIStoryboard.init(name: "Main", bundle: Bundle.main).instantiateViewController(withIdentifier: "PhotoAlbumViewController") as! PhotoAlbumViewController
         self.navigationController?.pushViewController(photoAlbumViewController, animated: true)
     }
