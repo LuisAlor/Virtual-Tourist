@@ -19,22 +19,32 @@ class MapViewController: UIViewController, UIGestureRecognizerDelegate, NSFetche
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        setupMapView()
+        setUpFetchedResultsController()
+    }
+    
+    fileprivate func setupMapView() {
         //Set MapView's delegate
         self.mapView.delegate = self
-        
         //Create a UITapGestureRecognizer
         let gestureRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(handleTapGesture(_:)))
         //Add gestureRecognizer to the mapView
         mapView.addGestureRecognizer(gestureRecognizer)
         //Set gestureRecognizer delegate to MapViewController
         gestureRecognizer.delegate = self
-        
+        //Check if there is a mapUserRegion saved in UserDefaults, if so set to mapView
+        if let region = getMapRegion() {
+            mapView.setRegion(region, animated: true)
+        }
+    }
+    
+    fileprivate func setUpFetchedResultsController() {
+        //Fetch Request Setup
         let fetchRequest: NSFetchRequest<Pin> = Pin.fetchRequest()
         
         let sortDescriptor = NSSortDescriptor(key: "latitude", ascending: false)
         fetchRequest.sortDescriptors = [sortDescriptor]
-
+        
         fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: CoreDataController.shared.viewContext, sectionNameKeyPath: nil, cacheName: nil)
         
         fetchedResultsController.delegate = self
@@ -45,12 +55,12 @@ class MapViewController: UIViewController, UIGestureRecognizerDelegate, NSFetche
         catch{
             print("Error in fecthing")
         }
-        
+        //TO-DO : Move somewhere else
         if let pins = fetchedResultsController.fetchedObjects{
             generateAnnotations(pins)
         }
-        
     }
+    
     ///Handles tap gestures and generatea an annotation on the MapView.
     @objc func handleTapGesture(_ gestureRecognizer: UILongPressGestureRecognizer){
         if gestureRecognizer.state == .ended {
@@ -69,7 +79,16 @@ class MapViewController: UIViewController, UIGestureRecognizerDelegate, NSFetche
         }
     }
     
-    //MARK: - generateAnnotations: Generate all the annotations from the StudentsLocation Data
+    func getMapRegion() -> MKCoordinateRegion? {
+        if let userMapRegion = UserDefaults.standard.dictionary(forKey: "userMapRegion"){
+            let userCenter = CLLocationCoordinate2D(latitude: userMapRegion["latitude"] as! CLLocationDegrees, longitude: userMapRegion["longitude"] as! CLLocationDegrees)
+            let userSpan = MKCoordinateSpan(latitudeDelta: userMapRegion["delta_latitude"] as! CLLocationDegrees, longitudeDelta: userMapRegion["delta_longitude"] as! CLLocationDegrees)
+            return MKCoordinateRegion(center: userCenter, span: userSpan)
+        }
+        return nil
+    }
+    
+    /// generateAnnotations: Generates all the annotations from saved Pins
     func generateAnnotations(_ pins: [Pin]){
         
         var annotations = [MKPointAnnotation]()
@@ -118,6 +137,20 @@ extension MapViewController: MKMapViewDelegate{
     
     func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
         //TO DO
+    }
+    
+    func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
+        saveUserRegion(mapView.region)
+    }
+    
+    func saveUserRegion(_ mapRegion: MKCoordinateRegion?){
+        if let mapRegion = mapRegion {
+            let userMapRegion = ["latitude": mapRegion.center.latitude,
+                                 "longitude": mapRegion.center.longitude,
+                                 "delta_latitude": mapRegion.span.latitudeDelta,
+                                 "delta_longitude": mapRegion.span.longitudeDelta]
+            UserDefaults.standard.set(userMapRegion, forKey: "userMapRegion")
+        }
     }
 }
 
