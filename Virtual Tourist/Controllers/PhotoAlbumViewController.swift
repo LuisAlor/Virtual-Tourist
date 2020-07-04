@@ -9,13 +9,9 @@
 import UIKit
 
 class PhotoAlbumViewController: UIViewController {
-
-    var test: String!
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        print(test)
-
     }
 
 }

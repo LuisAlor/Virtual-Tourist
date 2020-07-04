@@ -32,7 +32,6 @@
                     <navigationItem key="navigationItem" id="zkf-Sk-gwv"/>
                     <connections>
                         <outlet property="mapView" destination="DjO-Lg-jAb" id="ISI-6e-u8U"/>
-                        <segue destination="egO-lh-LWS" kind="show" id="AwO-S1-5n3"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
@@ -48,13 +47,13 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <stackView opaque="NO" contentMode="scaleAspectFit" axis="vertical" distribution="fillProportionally" alignment="center" spacing="41" translatesAutoresizingMaskIntoConstraints="NO" id="C5H-S8-wfl">
-                                <rect key="frame" x="0.0" y="88" width="414" height="734"/>
+                                <rect key="frame" x="0.0" y="44" width="414" height="778"/>
                                 <subviews>
                                     <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" mapType="standard" translatesAutoresizingMaskIntoConstraints="NO" id="7JO-ix-qKS">
-                                        <rect key="frame" x="20" y="0.0" width="374" height="309"/>
+                                        <rect key="frame" x="20" y="0.0" width="374" height="330.5"/>
                                     </mapView>
                                     <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="Hcj-2N-duM">
-                                        <rect key="frame" x="20" y="350" width="374" height="313"/>
+                                        <rect key="frame" x="20" y="371.5" width="374" height="334.5"/>
                                         <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
                                         <collectionViewFlowLayout key="collectionViewLayout" automaticEstimatedItemSize="YES" minimumLineSpacing="10" minimumInteritemSpacing="10" id="BWF-B0-Oio">
                                             <size key="itemSize" width="128" height="128"/>
@@ -63,7 +62,7 @@
                                             <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
                                         </collectionViewFlowLayout>
                                         <cells>
-                                            <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleAspectFit" id="2sH-vI-SQR">
+                                            <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleAspectFit" reuseIdentifier="photoAlbumCell" id="2sH-vI-SQR">
                                                 <rect key="frame" x="0.0" y="0.0" width="128" height="128"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                                 <collectionViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" id="Yqb-XX-V4W">
@@ -74,7 +73,7 @@
                                         </cells>
                                     </collectionView>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="KBg-1a-xvg">
-                                        <rect key="frame" x="155" y="704" width="104" height="30"/>
+                                        <rect key="frame" x="155" y="747" width="104" height="31"/>
                                         <state key="normal" title="New Collection"/>
                                     </button>
                                 </subviews>

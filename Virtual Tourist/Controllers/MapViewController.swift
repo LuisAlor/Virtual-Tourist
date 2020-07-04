@@ -23,6 +23,16 @@ class MapViewController: UIViewController, UIGestureRecognizerDelegate, NSFetche
         setupMapView()
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationController?.setNavigationBarHidden(true, animated: animated)
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        navigationController?.setNavigationBarHidden(false, animated: animated)
+    }
+    
     fileprivate func setupMapView() {
         //Set MapView's delegate
         self.mapView.delegate = self
