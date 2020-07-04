@@ -65,18 +65,13 @@ class MapViewController: UIViewController, UIGestureRecognizerDelegate, NSFetche
         fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: CoreDataController.shared.viewContext, sectionNameKeyPath: nil, cacheName: nil)
         
         fetchedResultsController.delegate = self
-        
-        do {
-            try fetchedResultsController.performFetch()
-        }
-        catch{
-            print("Error in fecthing")
-        }
+    
+        try? fetchedResultsController.performFetch()
     }
     
     ///Handles tap gestures and generatea an annotation on the MapView.
     @objc func handleTapGesture(_ gestureRecognizer: UILongPressGestureRecognizer){
-        if gestureRecognizer.state == .ended {
+        if gestureRecognizer.state == .began {
             let location = gestureRecognizer.location(in: self.mapView)
             let coordinate = mapView.convert(location, toCoordinateFrom: self.mapView)
 
@@ -89,6 +84,12 @@ class MapViewController: UIViewController, UIGestureRecognizerDelegate, NSFetche
             pin.latitude = coordinate.latitude
             pin.longitude = coordinate.longitude
             CoreDataController.shared.saveViewContext()
+            do {
+                try fetchedResultsController.performFetch()
+            }
+            catch {
+                print(error.localizedDescription)
+            }
         }
     }
     
@@ -163,6 +164,7 @@ extension MapViewController: MKMapViewDelegate{
         
         //Deselect the actual annotation for being able to select it after pressing back.
         mapView.deselectAnnotation(view.annotation, animated: true)
+                
         let photoAlbumViewController = UIStoryboard.init(name: "Main", bundle: Bundle.main).instantiateViewController(withIdentifier: "PhotoAlbumViewController") as! PhotoAlbumViewController
         
         if let selectedPinLat = view.annotation?.coordinate.latitude,
@@ -171,8 +173,6 @@ extension MapViewController: MKMapViewDelegate{
                 //Pins needs to be fetched for having the newest
                 if pin.latitude == selectedPinLat && pin.longitude == selectedPinLon{
                     photoAlbumViewController.selectedPin = pin
-                }else{
-                    print("No pins matched")
                 }
             }
         }
