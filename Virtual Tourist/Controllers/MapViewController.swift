@@ -25,14 +25,18 @@ class MapViewController: UIViewController, UIGestureRecognizerDelegate, NSFetche
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        //Hide NavigationBar from MapView
         navigationController?.setNavigationBarHidden(true, animated: animated)
     }
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
+        //Show NavigationBar when the viewWillDisappear
         navigationController?.setNavigationBarHidden(false, animated: animated)
+        fetchedResultsController = nil
     }
     
+    /// Setups map with gestures and restores user's region if available
     fileprivate func setupMapView() {
         //Set MapView's delegate
         self.mapView.delegate = self
@@ -40,6 +44,8 @@ class MapViewController: UIViewController, UIGestureRecognizerDelegate, NSFetche
         let gestureRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(handleTapGesture(_:)))
         //Add gestureRecognizer to the mapView
         mapView.addGestureRecognizer(gestureRecognizer)
+        //Disable map rotation, it is kind of annoying and not relevant feature for this app.
+        mapView.isRotateEnabled = false
         //Set gestureRecognizer delegate to MapViewController
         gestureRecognizer.delegate = self
         //Check if there is a mapUserRegion saved in UserDefaults and if there are pins stored generate the corresponding annotations
@@ -49,12 +55,12 @@ class MapViewController: UIViewController, UIGestureRecognizerDelegate, NSFetche
         }
     }
     
+    /// Setups the fetch Results controller to get our pins
     fileprivate func setUpFetchedResultsController() {
         //Fetch Request Setup
         let fetchRequest: NSFetchRequest<Pin> = Pin.fetchRequest()
         
-        let sortDescriptor = NSSortDescriptor(key: "latitude", ascending: false)
-        fetchRequest.sortDescriptors = [sortDescriptor]
+        fetchRequest.sortDescriptors = []
         
         fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: CoreDataController.shared.viewContext, sectionNameKeyPath: nil, cacheName: nil)
         
@@ -154,9 +160,24 @@ extension MapViewController: MKMapViewDelegate{
     }
     
     func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
+        
         //Deselect the actual annotation for being able to select it after pressing back.
         mapView.deselectAnnotation(view.annotation, animated: true)
         let photoAlbumViewController = UIStoryboard.init(name: "Main", bundle: Bundle.main).instantiateViewController(withIdentifier: "PhotoAlbumViewController") as! PhotoAlbumViewController
+        
+        if let selectedPinLat = view.annotation?.coordinate.latitude,
+            let selectedPinLon = view.annotation?.coordinate.longitude, let pins = fetchedResultsController.fetchedObjects{
+            for pin in pins{
+                //Pins needs to be fetched for having the newest
+                if pin.latitude == selectedPinLat && pin.longitude == selectedPinLon{
+                    photoAlbumViewController.selectedPin = pin
+                }else{
+                    print("No pins matched")
+                }
+            }
+        }
+    
+        
         self.navigationController?.pushViewController(photoAlbumViewController, animated: true)
     }
 

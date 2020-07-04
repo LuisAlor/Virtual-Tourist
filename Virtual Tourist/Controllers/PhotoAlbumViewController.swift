@@ -7,11 +7,30 @@
 //
 
 import UIKit
+import CoreData
 
 class PhotoAlbumViewController: UIViewController {
     
+    var selectedPin: Pin?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        //Search for photos in flicker from the selected pin
+        if let selectedPin = selectedPin {
+            FlickrClient.flickrGETSearchPhotos(lat: selectedPin.latitude, lon: selectedPin.longitude, completionHandler: searchFlickrPhotosHandler(photos:error:))
+        }
     }
-
+    
+    func searchFlickrPhotosHandler(photos: [Photo], error: Error?){
+        print(photos)
+//        for photo in photos{
+//            FlickrClient.downloadImage(imageURL: URL(string: photo.imageURL)!, completionHandler: downloadFlickrImagesHandler(data:error:))
+//        }
+    }
+    
+    func downloadFlickrImagesHandler(data: Data?, error: Error?){
+        print("Download")
+    }
+    
 }

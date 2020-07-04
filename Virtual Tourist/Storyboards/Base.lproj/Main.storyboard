@@ -22,10 +22,10 @@
                         </subviews>
                         <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
                         <constraints>
-                            <constraint firstItem="DjO-Lg-jAb" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="3hv-vp-3zh"/>
-                            <constraint firstItem="DjO-Lg-jAb" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="k9G-8G-R0O"/>
-                            <constraint firstItem="DjO-Lg-jAb" firstAttribute="bottom" secondItem="6Tk-OE-BBY" secondAttribute="bottom" id="nia-Vs-rQP"/>
-                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="DjO-Lg-jAb" secondAttribute="trailing" id="rMd-WJ-wsp"/>
+                            <constraint firstItem="DjO-Lg-jAb" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="topMargin" id="UYi-zo-1aw"/>
+                            <constraint firstAttribute="bottomMargin" secondItem="DjO-Lg-jAb" secondAttribute="bottom" id="UpK-Cj-WDN"/>
+                            <constraint firstItem="DjO-Lg-jAb" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="WeA-No-sD2"/>
+                            <constraint firstItem="DjO-Lg-jAb" firstAttribute="trailing" secondItem="6Tk-OE-BBY" secondAttribute="trailing" id="vxq-Pq-Huh"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                     </view>
@@ -36,7 +36,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-913" y="135"/>
+            <point key="canvasLocation" x="-913.04347826086962" y="134.59821428571428"/>
         </scene>
         <!--Photo Album View Controller-->
         <scene sceneID="PcU-Ju-1Oz">

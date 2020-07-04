@@ -65,6 +65,7 @@ class FlickrClient {
     
     /// Downloads an image from Flickr servers into our device
     public class func downloadImage(imageURL: URL, completionHandler: @escaping (Data?, Error?) -> Void ){
+                
         let task = URLSession.shared.dataTask(with: imageURL) { (data, response, error) in
             guard let data = data else {
                 DispatchQueue.main.async {
@@ -80,6 +81,7 @@ class FlickrClient {
     }
     /// Returns an array of [Photo]'s by the latitude and longitude provided
     public class func flickrGETSearchPhotos(lat: Double, lon: Double, completionHandler: @escaping ([Photo], Error?) -> Void ){
+        
         sendGETRequest(url: Endpoints.searchPhotos(latitude: lat, longitude: lon).url, response: PhotosSearchResponse.self) { (response, error) in
             if let response = response {
                 completionHandler(response.photos.photo, nil)
