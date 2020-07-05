@@ -25,6 +25,8 @@ class MapViewController: UIViewController, UIGestureRecognizerDelegate, NSFetche
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        //Setup the FetchedResultsController
+        setUpFetchedResultsController()
         //Hide NavigationBar from MapView
         navigationController?.setNavigationBarHidden(true, animated: animated)
     }
@@ -33,6 +35,7 @@ class MapViewController: UIViewController, UIGestureRecognizerDelegate, NSFetche
         super.viewWillDisappear(animated)
         //Show NavigationBar when the viewWillDisappear
         navigationController?.setNavigationBarHidden(false, animated: animated)
+        //Remove any reference to fetchedResultsController
         fetchedResultsController = nil
     }
     
@@ -71,26 +74,25 @@ class MapViewController: UIViewController, UIGestureRecognizerDelegate, NSFetche
     
     ///Handles tap gestures and generatea an annotation on the MapView.
     @objc func handleTapGesture(_ gestureRecognizer: UILongPressGestureRecognizer){
-        if gestureRecognizer.state == .began {
-            let location = gestureRecognizer.location(in: self.mapView)
-            let coordinate = mapView.convert(location, toCoordinateFrom: self.mapView)
+                
+        if gestureRecognizer.state != .began { return }
+                
+        let location = gestureRecognizer.location(in: self.mapView)
+        let coordinate = mapView.convert(location, toCoordinateFrom: self.mapView)
 
-            // Add annotation:
-            let annotation = MKPointAnnotation()
-            annotation.coordinate = coordinate
-            self.mapView.addAnnotation(annotation)
-            
-            let pin = Pin(context: CoreDataController.shared.viewContext)
-            pin.latitude = coordinate.latitude
-            pin.longitude = coordinate.longitude
-            CoreDataController.shared.saveViewContext()
-            do {
-                try fetchedResultsController.performFetch()
-            }
-            catch {
-                print(error.localizedDescription)
-            }
-        }
+        // Add annotation:
+        let annotation = MKPointAnnotation()
+        annotation.coordinate = coordinate
+        mapView.addAnnotation(annotation)
+        mapView.showAnnotations(mapView.annotations, animated: true)
+
+        let pin = Pin(context: CoreDataController.shared.viewContext)
+        pin.latitude = coordinate.latitude
+        pin.longitude = coordinate.longitude
+        
+        CoreDataController.shared.saveViewContext()
+        try? fetchedResultsController.performFetch()
+        
     }
     
     ///Gets the user's map region if exists in UserDefaults database
@@ -105,9 +107,9 @@ class MapViewController: UIViewController, UIGestureRecognizerDelegate, NSFetche
     
     ///Generates all the annotations from saved Pins
     func generateAnnotations(_ pins: [Pin]){
-        
+                
         var annotations = [MKPointAnnotation]()
-               
+                       
         for pin in pins {
            
             let lat = CLLocationDegrees(pin.latitude)
@@ -150,9 +152,8 @@ extension MapViewController: MKMapViewDelegate{
         //If no pin exist create one and setup
         if pinView == nil{
             pinView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: reuseId)
-            pinView!.canShowCallout = false
-            pinView!.tintColor = UIColor.blue
             pinView!.animatesDrop = true
+            pinView!.canShowCallout = true
         } else {
             //If there is set it as our annotation
             pinView!.annotation = annotation
@@ -161,7 +162,7 @@ extension MapViewController: MKMapViewDelegate{
     }
     
     func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
-        
+                
         //Deselect the actual annotation for being able to select it after pressing back.
         mapView.deselectAnnotation(view.annotation, animated: true)
                 
@@ -170,21 +171,19 @@ extension MapViewController: MKMapViewDelegate{
         if let selectedPinLat = view.annotation?.coordinate.latitude,
             let selectedPinLon = view.annotation?.coordinate.longitude, let pins = fetchedResultsController.fetchedObjects{
             for pin in pins{
-                //Pins needs to be fetched for having the newest
                 if pin.latitude == selectedPinLat && pin.longitude == selectedPinLon{
                     photoAlbumViewController.selectedPin = pin
                 }
             }
         }
-    
         
         self.navigationController?.pushViewController(photoAlbumViewController, animated: true)
     }
-
+    
     func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
         //If the region changed then save this to keep data persistent.
         saveUserRegion(mapView.region)
     }
-
+    
 }
 
