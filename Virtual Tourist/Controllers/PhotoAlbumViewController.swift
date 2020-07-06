@@ -18,7 +18,7 @@ class PhotoAlbumViewController: UIViewController {
         super.viewDidLoad()
         
         setUpFetchedResultsController()
-        
+    
         if let photosFetched = fetchedResultsController.fetchedObjects{
             if !photosFetched.isEmpty{
                 print("Photos already in CoreDataDatabase for this pin")
@@ -40,7 +40,7 @@ class PhotoAlbumViewController: UIViewController {
         fetchedResultsController = nil
     }
     
-    /// Setups the fetch Results controller to get our photos
+    /// Configures the Fetch Results controller to get saved photos
     fileprivate func setUpFetchedResultsController() {
         //Fetch Request Setup
         let fetchRequest: NSFetchRequest<FlickrPhoto> = FlickrPhoto.fetchRequest()
@@ -57,7 +57,8 @@ class PhotoAlbumViewController: UIViewController {
     
         try? fetchedResultsController.performFetch()
     }
-    
+
+    ///Downloads all the pictures that were obtained through Flickr API response.
     func searchFlickrPhotosHandler(photos: [Photo], error: Error?){
         print(photos)
         if !photos.isEmpty{
@@ -70,13 +71,18 @@ class PhotoAlbumViewController: UIViewController {
         }
     }
     
+    ///Handles the downloaded image and saves in CoreData DB
     func downloadFlickrImagesHandler(data: Data?, error: Error?){
         let imageToSave = FlickrPhoto(context: CoreDataController.shared.viewContext)
-        imageToSave.imageFile = data
-        CoreDataController.shared.saveViewContext()
-        print("Images Saved")
+        if let data = data {
+            //Set the imageFile to the picture downloaded
+            imageToSave.imageFile = data
+            //Select to what pin this image corresponds
+            imageToSave.pin = selectedPin
+            //Save to coreData DB
+            CoreDataController.shared.saveViewContext()
+        }
     }
-    
 }
 
 extension PhotoAlbumViewController: NSFetchedResultsControllerDelegate{

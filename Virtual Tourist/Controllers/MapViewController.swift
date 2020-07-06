@@ -84,7 +84,9 @@ class MapViewController: UIViewController, UIGestureRecognizerDelegate, NSFetche
         let annotation = MKPointAnnotation()
         annotation.coordinate = coordinate
         mapView.addAnnotation(annotation)
-        mapView.showAnnotations(mapView.annotations, animated: true)
+        
+        //Set center coordinate of the map's without zoom (Fixes double tap pressing for opening pin)
+        mapView.setCenter(mapView.centerCoordinate, animated: true)
 
         let pin = Pin(context: CoreDataController.shared.viewContext)
         pin.latitude = coordinate.latitude
@@ -153,7 +155,9 @@ extension MapViewController: MKMapViewDelegate{
         if pinView == nil{
             pinView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: reuseId)
             pinView!.animatesDrop = true
-            pinView!.canShowCallout = true
+            pinView!.canShowCallout = false
+            pinView!.pinTintColor = .blue
+
         } else {
             //If there is set it as our annotation
             pinView!.annotation = annotation
