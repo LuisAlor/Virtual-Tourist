@@ -19,14 +19,14 @@ class MapViewController: UIViewController, UIGestureRecognizerDelegate, NSFetche
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        setUpFetchedResultsController()
+        setupFetchedResultsController()
         setupMapView()
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         //Setup the FetchedResultsController
-        setUpFetchedResultsController()
+        setupFetchedResultsController()
         //Hide NavigationBar from MapView
         navigationController?.setNavigationBarHidden(true, animated: animated)
     }
@@ -59,7 +59,7 @@ class MapViewController: UIViewController, UIGestureRecognizerDelegate, NSFetche
     }
     
     /// Setups the fetch Results controller to get our pins
-    fileprivate func setUpFetchedResultsController() {
+    fileprivate func setupFetchedResultsController() {
         //Fetch Request Setup
         let fetchRequest: NSFetchRequest<Pin> = Pin.fetchRequest()
         
@@ -169,7 +169,7 @@ extension MapViewController: MKMapViewDelegate{
                 
         //Deselect the actual annotation for being able to select it after pressing back.
         mapView.deselectAnnotation(view.annotation, animated: true)
-                
+                        
         let photoAlbumViewController = UIStoryboard.init(name: "Main", bundle: Bundle.main).instantiateViewController(withIdentifier: "PhotoAlbumViewController") as! PhotoAlbumViewController
         
         if let selectedPinLat = view.annotation?.coordinate.latitude,
@@ -179,9 +179,8 @@ extension MapViewController: MKMapViewDelegate{
                     photoAlbumViewController.selectedPin = pin
                 }
             }
+            self.navigationController?.pushViewController(photoAlbumViewController, animated: true)
         }
-        
-        self.navigationController?.pushViewController(photoAlbumViewController, animated: true)
     }
     
     func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {

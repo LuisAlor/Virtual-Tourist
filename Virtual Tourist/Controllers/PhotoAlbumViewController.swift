@@ -18,6 +18,7 @@ class PhotoAlbumViewController: UIViewController {
     
     var selectedPin: Pin!
     var fetchedResultsController: NSFetchedResultsController<FlickrPhoto>!
+    var imagesURL: [Photo] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -29,16 +30,12 @@ class PhotoAlbumViewController: UIViewController {
         mapView.delegate = self
         
         setupFetchedResultsController()
-        
         setupMapView()
-    
-        if let photosFetched = fetchedResultsController.fetchedObjects{
-            if photosFetched.isEmpty{
-                newCollection.isEnabled = false
-                //Search for photos in flicker from the selected pin
-                FlickrClient.flickrGETSearchPhotos(lat: selectedPin.latitude, lon: selectedPin.longitude, completionHandler: searchFlickrPhotosHandler(photos:error:))
-            }
+        
+        if !checkPinHasAlbum() {
+            FlickrClient.flickrGETSearchPhotos(lat: selectedPin.latitude, lon: selectedPin.longitude, completionHandler: getFlickrImagesURL(photos:error:))
         }
+        
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -68,18 +65,31 @@ class PhotoAlbumViewController: UIViewController {
     
         try? fetchedResultsController.performFetch()
     }
-
-    ///Downloads all the pictures that were obtained through Flickr API response.
-    func searchFlickrPhotosHandler(photos: [Photo], error: Error?){
-        print(photos)
-        if !photos.isEmpty{
-            for photo in photos{
-                FlickrClient.downloadImage(imageURL: URL(string: photo.imageURL)!, completionHandler: downloadFlickrImagesHandler(data:error:))
+    
+    func checkPinHasAlbum() -> Bool {
+        if let photosFetched = fetchedResultsController.fetchedObjects{
+            if !photosFetched.isEmpty{
+                return true
             }
-        }else{
-            //TO-DO Add label for showing no images were found
-            print("No images were saved/found")
-            newCollection.isEnabled = true
+        }
+        return false
+    }
+    
+    func getFlickrImagesURL(photos: [Photo], error: Error?){
+        if error == nil {
+            
+            self.imagesURL = photos
+            self.collectionView.reloadData()
+            
+            if !photos.isEmpty{
+                for photo in photos{
+                    FlickrClient.downloadImage(imageURL: URL(string: photo.imageURL)!, completionHandler: downloadFlickrImagesHandler(data:error:))
+                }
+            }else{
+                //TO-DO Add label for showing no images were found
+                print("No images were saved/found")
+                newCollection.isEnabled = true
+            }
         }
     }
     
@@ -156,24 +166,39 @@ extension PhotoAlbumViewController: NSFetchedResultsControllerDelegate{
 }
 
 extension PhotoAlbumViewController: UICollectionViewDelegate, UICollectionViewDataSource{
-    
+        
     func numberOfSections(in collectionView: UICollectionView) -> Int {
         return fetchedResultsController.sections?.count ?? 1
     }
 
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return fetchedResultsController.sections?[section].numberOfObjects ?? 0
+        if checkPinHasAlbum() {
+            return fetchedResultsController.sections?[section].numberOfObjects ?? 0
+        } else {
+            return imagesURL.count
+        }
     }
     
         
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "PhotoCollectionViewCell", for: indexPath) as! PhotoCollectionViewCell
-        let object = fetchedResultsController.object(at: indexPath)
-        if let flickrPhoto = object.imageFile {
-            cell.imageView.image = UIImage(data: flickrPhoto)
+        if checkPinHasAlbum() {
+            let object = fetchedResultsController.object(at: indexPath)
+            if let flickrPhoto = object.imageFile {
+                cell.imageView.image = UIImage(data: flickrPhoto)
+            }
+        } else {
+            cell.imageView.image = UIImage(named: "photo_placeholder")
         }
+        
         return cell
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        //Select from indexPath which object from CollectionView should be deleted from persistent store
+        let objectToDelete = fetchedResultsController.object(at: indexPath)
+        CoreDataController.shared.viewContext.delete(objectToDelete)
     }
         
 }
