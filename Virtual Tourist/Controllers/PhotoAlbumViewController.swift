@@ -14,6 +14,7 @@ class PhotoAlbumViewController: UIViewController {
     
     @IBOutlet weak var collectionView: UICollectionView!
     @IBOutlet weak var mapView: MKMapView!
+    @IBOutlet weak var newCollection: UIButton!
     
     var selectedPin: Pin!
     var fetchedResultsController: NSFetchedResultsController<FlickrPhoto>!
@@ -21,7 +22,6 @@ class PhotoAlbumViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        //Setup collectionView Delegation
         collectionView.delegate = self
         collectionView.dataSource = self
         
@@ -29,6 +29,8 @@ class PhotoAlbumViewController: UIViewController {
         mapView.delegate = self
         
         setUpFetchedResultsController()
+        
+        setupMapView()
     
         if let photosFetched = fetchedResultsController.fetchedObjects{
             if !photosFetched.isEmpty{
@@ -76,6 +78,7 @@ class PhotoAlbumViewController: UIViewController {
             for photo in photos{
                 FlickrClient.downloadImage(imageURL: URL(string: photo.imageURL)!, completionHandler: downloadFlickrImagesHandler(data:error:))
                 print("Downloading Image")
+                print(photo.imageURL)
             }
         }else{
             print("No images were saved/found")
@@ -93,6 +96,38 @@ class PhotoAlbumViewController: UIViewController {
             //Save to coreData DB
             CoreDataController.shared.saveViewContext()
         }
+    }
+    
+    ///Configures MapView Region and Add Saved Pin as annotation.
+    func setupMapView(){
+    
+        var annotations = [MKPointAnnotation]()
+                       
+        let lat = CLLocationDegrees(selectedPin.latitude)
+        let long = CLLocationDegrees(selectedPin.longitude)
+                   
+        // The lat and long to create a CLLocationCoordinates2D instance.
+        let coordinate = CLLocationCoordinate2D(latitude: lat, longitude: long)
+                   
+        // Here we create the annotation and set its coordiate, title, and subtitle properties
+        let annotation = MKPointAnnotation()
+        annotation.coordinate = coordinate
+       
+        // Place the annotation in an array of annotations.
+        annotations.append(annotation)
+        
+        // When the array is complete, add the annotations to the map.
+        self.mapView.addAnnotations(annotations)
+        
+        //Set map region for our pin
+        let span = MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
+        let region = MKCoordinateRegion(center: coordinate, span: span)
+        mapView.setRegion(region, animated: true)
+
+    }
+    
+    @IBAction func getNewCollection(_ sender: UIButton?){
+        //TO-DO
     }
 }
 
@@ -146,9 +181,28 @@ extension PhotoAlbumViewController: UICollectionViewDelegate, UICollectionViewDa
         return cell
     }
     
-    
 }
 
 extension PhotoAlbumViewController: MKMapViewDelegate{
+    
+    func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
+        //Name our reusable pin ID
+        let reuseId = "pin"
+        //Dequee for any free annotaion view with reuseId
+        var pinView = mapView.dequeueReusableAnnotationView(withIdentifier: reuseId) as? MKPinAnnotationView
+        
+        //If no pin exist create one and setup
+        if pinView == nil{
+            pinView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: reuseId)
+            pinView!.animatesDrop = true
+            pinView!.canShowCallout = false
+            pinView!.pinTintColor = .blue
+
+        } else {
+            //If there is set it as our annotation
+            pinView!.annotation = annotation
+        }
+        return pinView
+    }
     
 }
