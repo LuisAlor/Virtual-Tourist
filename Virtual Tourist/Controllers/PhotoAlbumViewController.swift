@@ -244,9 +244,7 @@ extension PhotoAlbumViewController: UICollectionViewDelegate, UICollectionViewDa
             }
         } else {
             cell.imageView.image = UIImage(named: "photo_placeholder")
-            for photo in photosURL {
-                FlickrClient.downloadImage(imageURL:  URL(string: photo.imageURL)!, completionHandler: downloadFlickrImagesHandler(data:error:))
-            }
+            FlickrClient.downloadImage(imageURL:  URL(string: photosURL[indexPath.row].imageURL)!, completionHandler: downloadFlickrImagesHandler(data:error:))
         }
         
         return cell
