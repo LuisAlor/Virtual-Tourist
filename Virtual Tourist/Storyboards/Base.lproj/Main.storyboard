@@ -72,8 +72,8 @@
                                                 <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="photo_placeholder" translatesAutoresizingMaskIntoConstraints="NO" id="KED-lP-W8W">
                                                     <rect key="frame" x="0.0" y="0.0" width="150" height="150"/>
                                                     <constraints>
-                                                        <constraint firstAttribute="height" constant="150" id="Zll-Ge-whb"/>
-                                                        <constraint firstAttribute="width" constant="150" id="hgW-RA-3p3"/>
+                                                        <constraint firstAttribute="width" constant="150" id="MXz-B0-0sf"/>
+                                                        <constraint firstAttribute="height" constant="150" id="fOW-HJ-glP"/>
                                                     </constraints>
                                                 </imageView>
                                             </subviews>

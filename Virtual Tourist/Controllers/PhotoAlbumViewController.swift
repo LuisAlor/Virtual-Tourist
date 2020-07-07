@@ -18,7 +18,8 @@ class PhotoAlbumViewController: UIViewController {
     
     var selectedPin: Pin!
     var fetchedResultsController: NSFetchedResultsController<FlickrPhoto>!
-    var imagesURL: [Photo] = []
+    var photosURL: [Photo] = []
+    var blockOperations: [BlockOperation] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -77,19 +78,8 @@ class PhotoAlbumViewController: UIViewController {
     
     func getFlickrImagesURL(photos: [Photo], error: Error?){
         if error == nil {
-            
-            self.imagesURL = photos
+            self.photosURL = photos
             self.collectionView.reloadData()
-            
-            if !photos.isEmpty{
-                for photo in photos{
-                    FlickrClient.downloadImage(imageURL: URL(string: photo.imageURL)!, completionHandler: downloadFlickrImagesHandler(data:error:))
-                }
-            }else{
-                //TO-DO Add label for showing no images were found
-                print("No images were saved/found")
-                newCollection.isEnabled = true
-            }
         }
     }
     
@@ -103,6 +93,7 @@ class PhotoAlbumViewController: UIViewController {
             imageToSave.pin = selectedPin
             //Save to coreData DB
             CoreDataController.shared.saveViewContext()
+            self.collectionView.reloadData()
         }
     }
     
@@ -140,29 +131,90 @@ class PhotoAlbumViewController: UIViewController {
 }
 
 extension PhotoAlbumViewController: NSFetchedResultsControllerDelegate{
-
-
-    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-    
-    }
-    
+        
     func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange anObject: Any, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
-        switch type {
-        case .insert:
-            if let newIndexPath = newIndexPath {
-                collectionView.insertItems(at: [newIndexPath])
-            }
-        case .delete:
-            if let indexPath = indexPath{
-                collectionView.deleteItems(at: [indexPath])
-            }
-        case .move, .update:
-            break
-    
-        @unknown default:
-            break
+        if type == NSFetchedResultsChangeType.insert {
+            blockOperations.append(
+                BlockOperation(block: { [weak self] in
+                    if let this = self {
+                        this.collectionView!.insertItems(at: [newIndexPath!])
+                    }
+                })
+            )
+        }
+        else if type == NSFetchedResultsChangeType.update {
+            blockOperations.append(
+                BlockOperation(block: { [weak self] in
+                    if let this = self {
+                        this.collectionView!.reloadItems(at: [indexPath!])
+                    }
+                })
+            )
+        }
+        else if type == NSFetchedResultsChangeType.move {
+            blockOperations.append(
+                BlockOperation(block: { [weak self] in
+                    if let this = self {
+                        this.collectionView!.moveItem(at: indexPath!, to: newIndexPath!)
+                    }
+                })
+            )
+        }
+        else if type == NSFetchedResultsChangeType.delete {
+            blockOperations.append(
+                BlockOperation(block: { [weak self] in
+                    if let this = self {
+                        this.collectionView!.deleteItems(at: [indexPath!])
+                    }
+                })
+            )
         }
     }
+    public func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange sectionInfo: NSFetchedResultsSectionInfo, atSectionIndex sectionIndex: Int, for type: NSFetchedResultsChangeType) {
+        
+        if type == NSFetchedResultsChangeType.insert {
+            print("Insert Section: \(sectionIndex)")
+            
+            blockOperations.append(
+                BlockOperation(block: { [weak self] in
+                    if let this = self {
+                        this.collectionView!.insertSections(NSIndexSet(index: sectionIndex) as IndexSet)
+                    }
+                })
+            )
+        }
+        else if type == NSFetchedResultsChangeType.update {
+            print("Update Section: \(sectionIndex)")
+            blockOperations.append(
+                BlockOperation(block: { [weak self] in
+                    if let this = self {
+                        this.collectionView!.reloadSections(NSIndexSet(index: sectionIndex) as IndexSet)
+                    }
+                })
+            )
+        }
+        else if type == NSFetchedResultsChangeType.delete {
+            print("Delete Section: \(sectionIndex)")
+            
+            blockOperations.append(
+                BlockOperation(block: { [weak self] in
+                    if let this = self {
+                        this.collectionView!.deleteSections(NSIndexSet(index: sectionIndex) as IndexSet)
+                    }
+                })
+            )
+        }
+    }
+    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+        collectionView!.performBatchUpdates({ () -> Void in
+                for operation: BlockOperation in self.blockOperations {
+                    operation.start()
+                }
+            }, completion: { (finished) -> Void in
+                self.blockOperations.removeAll(keepingCapacity: false)
+        })
+    }
+
 }
 
 extension PhotoAlbumViewController: UICollectionViewDelegate, UICollectionViewDataSource{
@@ -173,16 +225,18 @@ extension PhotoAlbumViewController: UICollectionViewDelegate, UICollectionViewDa
 
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        if checkPinHasAlbum() {
+        if checkPinHasAlbum(){
             return fetchedResultsController.sections?[section].numberOfObjects ?? 0
         } else {
-            return imagesURL.count
+            return photosURL.count
         }
     }
     
         
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+       
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "PhotoCollectionViewCell", for: indexPath) as! PhotoCollectionViewCell
+                
         if checkPinHasAlbum() {
             let object = fetchedResultsController.object(at: indexPath)
             if let flickrPhoto = object.imageFile {
@@ -190,6 +244,9 @@ extension PhotoAlbumViewController: UICollectionViewDelegate, UICollectionViewDa
             }
         } else {
             cell.imageView.image = UIImage(named: "photo_placeholder")
+            for photo in photosURL {
+                FlickrClient.downloadImage(imageURL:  URL(string: photo.imageURL)!, completionHandler: downloadFlickrImagesHandler(data:error:))
+            }
         }
         
         return cell
