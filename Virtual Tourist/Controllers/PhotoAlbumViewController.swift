@@ -102,10 +102,25 @@ extension PhotoAlbumViewController: NSFetchedResultsControllerDelegate{
     }
 
     func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-        
+    
     }
+    
     func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange anObject: Any, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
-
+        switch type {
+        case .insert:
+            if let newIndexPath = newIndexPath {
+                collectionView.insertItems(at: [newIndexPath])
+            }
+        case .delete:
+            if let indexPath = indexPath{
+                collectionView.deleteItems(at: [indexPath])
+            }
+        case .move, .update:
+            break
+    
+        @unknown default:
+            break
+        }
     }
 }
 
