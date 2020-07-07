@@ -23,6 +23,7 @@
 		BD23BC9E24AB3A2300B4229F /* Photos.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD23BC9D24AB3A2300B4229F /* Photos.swift */; };
 		BD23BCA024AB4FB900B4229F /* PhotosSearchResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD23BC9F24AB4FB900B4229F /* PhotosSearchResponse.swift */; };
 		BD9BB61B24AB83E800944D18 /* CoreDataController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD9BB61A24AB83E800944D18 /* CoreDataController.swift */; };
+		BDB9C34124B39864002656C5 /* PhotoCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDB9C34024B39864002656C5 /* PhotoCollectionViewCell.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -44,6 +45,7 @@
 		BD23BC9D24AB3A2300B4229F /* Photos.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Photos.swift; sourceTree = "<group>"; };
 		BD23BC9F24AB4FB900B4229F /* PhotosSearchResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotosSearchResponse.swift; sourceTree = "<group>"; };
 		BD9BB61A24AB83E800944D18 /* CoreDataController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataController.swift; sourceTree = "<group>"; };
+		BDB9C34024B39864002656C5 /* PhotoCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoCollectionViewCell.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -103,6 +105,7 @@
 		BD23BC8724A5DC8800B4229F /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				BDB9C34024B39864002656C5 /* PhotoCollectionViewCell.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -242,6 +245,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				BD23BC9624A75B0C00B4229F /* FlickrKeys.swift in Sources */,
+				BDB9C34124B39864002656C5 /* PhotoCollectionViewCell.swift in Sources */,
 				BD23BC7A24A4EF8F00B4229F /* Virtual_Tourist.xcdatamodeld in Sources */,
 				BD9BB61B24AB83E800944D18 /* CoreDataController.swift in Sources */,
 				BD23BC9824A75CB800B4229F /* GetFlickrAPIKeys.swift in Sources */,

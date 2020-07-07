@@ -8,14 +8,25 @@
 
 import UIKit
 import CoreData
+import MapKit
 
 class PhotoAlbumViewController: UIViewController {
+    
+    @IBOutlet weak var collectionView: UICollectionView!
+    @IBOutlet weak var mapView: MKMapView!
     
     var selectedPin: Pin!
     var fetchedResultsController: NSFetchedResultsController<FlickrPhoto>!
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        //Setup collectionView Delegation
+        collectionView.delegate = self
+        collectionView.dataSource = self
+        
+        //Set mapView delegate to PhotoAlbumViewController
+        mapView.delegate = self
         
         setUpFetchedResultsController()
     
@@ -87,5 +98,42 @@ class PhotoAlbumViewController: UIViewController {
 
 extension PhotoAlbumViewController: NSFetchedResultsControllerDelegate{
     
+    func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+    }
+
+    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+        
+    }
+    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange anObject: Any, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
+
+    }
+}
+
+extension PhotoAlbumViewController: UICollectionViewDelegate, UICollectionViewDataSource{
+    
+    func numberOfSections(in collectionView: UICollectionView) -> Int {
+        return fetchedResultsController.sections?.count ?? 1
+    }
+
+    
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return fetchedResultsController.sections?[section].numberOfObjects ?? 0
+    }
+    
+        
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "PhotoCollectionViewCell", for: indexPath) as! PhotoCollectionViewCell
+        let object = fetchedResultsController.object(at: indexPath)
+        if let flickrPhoto = object.imageFile {
+            cell.imageView.image = UIImage(data: flickrPhoto)
+        }
+        
+        return cell
+    }
+    
+    
+}
+
+extension PhotoAlbumViewController: MKMapViewDelegate{
     
 }
