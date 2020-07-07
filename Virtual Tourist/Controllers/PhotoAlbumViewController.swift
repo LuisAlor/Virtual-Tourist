@@ -28,15 +28,13 @@ class PhotoAlbumViewController: UIViewController {
         //Set mapView delegate to PhotoAlbumViewController
         mapView.delegate = self
         
-        setUpFetchedResultsController()
+        setupFetchedResultsController()
         
         setupMapView()
     
         if let photosFetched = fetchedResultsController.fetchedObjects{
-            if !photosFetched.isEmpty{
-                print("Photos already in CoreDataDatabase for this pin")
-            }else{
-                print("Downloading set of photos if exists")
+            if photosFetched.isEmpty{
+                newCollection.isEnabled = false
                 //Search for photos in flicker from the selected pin
                 FlickrClient.flickrGETSearchPhotos(lat: selectedPin.latitude, lon: selectedPin.longitude, completionHandler: searchFlickrPhotosHandler(photos:error:))
             }
@@ -45,7 +43,7 @@ class PhotoAlbumViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(true)
-        setUpFetchedResultsController()
+        setupFetchedResultsController()
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -54,7 +52,7 @@ class PhotoAlbumViewController: UIViewController {
     }
     
     /// Configures the Fetch Results controller to get saved photos
-    fileprivate func setUpFetchedResultsController() {
+    fileprivate func setupFetchedResultsController() {
         //Fetch Request Setup
         let fetchRequest: NSFetchRequest<FlickrPhoto> = FlickrPhoto.fetchRequest()
         
@@ -77,11 +75,11 @@ class PhotoAlbumViewController: UIViewController {
         if !photos.isEmpty{
             for photo in photos{
                 FlickrClient.downloadImage(imageURL: URL(string: photo.imageURL)!, completionHandler: downloadFlickrImagesHandler(data:error:))
-                print("Downloading Image")
-                print(photo.imageURL)
             }
         }else{
+            //TO-DO Add label for showing no images were found
             print("No images were saved/found")
+            newCollection.isEnabled = true
         }
     }
     
@@ -132,9 +130,7 @@ class PhotoAlbumViewController: UIViewController {
 }
 
 extension PhotoAlbumViewController: NSFetchedResultsControllerDelegate{
-    
-    func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-    }
+
 
     func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
     
@@ -177,10 +173,9 @@ extension PhotoAlbumViewController: UICollectionViewDelegate, UICollectionViewDa
         if let flickrPhoto = object.imageFile {
             cell.imageView.image = UIImage(data: flickrPhoto)
         }
-        
         return cell
     }
-    
+        
 }
 
 extension PhotoAlbumViewController: MKMapViewDelegate{
