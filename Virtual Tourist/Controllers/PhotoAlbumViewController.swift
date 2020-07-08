@@ -15,6 +15,8 @@ class PhotoAlbumViewController: UIViewController {
     @IBOutlet weak var collectionView: UICollectionView!
     @IBOutlet weak var mapView: MKMapView!
     @IBOutlet weak var newCollection: UIButton!
+    @IBOutlet weak var activityViewIndicator: UIActivityIndicatorView!
+    @IBOutlet weak var noImagesLabel: UILabel!
     
     var selectedPin: Pin!
     var fetchedResultsController: NSFetchedResultsController<FlickrPhoto>!
@@ -24,18 +26,16 @@ class PhotoAlbumViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        collectionView.delegate = self
-        collectionView.dataSource = self
-        
-        setCollectionFlowLayout()
-        
-        //Set mapView delegate to PhotoAlbumViewController
-        mapView.delegate = self
-        
+        setupCollectionView()
         setupFetchedResultsController()
         setupMapView()
         
+        noImagesLabel.isHidden = false
+        //Hide activity indicatory when stops
+        activityViewIndicator.hidesWhenStopped = true
+        
         if !checkPinHasAlbum() {
+            activityViewIndicator.startAnimating()
             FlickrClient.flickrGETSearchPhotos(lat: selectedPin.latitude, lon: selectedPin.longitude, completionHandler: getFlickrImagesURL(photos:error:))
         }
         
@@ -51,7 +51,7 @@ class PhotoAlbumViewController: UIViewController {
         fetchedResultsController = nil
     }
     
-    /// Configures the Fetch Results controller to get saved photos.
+    ///Configures the Fetch Results controller to get saved photos.
     fileprivate func setupFetchedResultsController() {
         //Fetch Request Setup
         let fetchRequest: NSFetchRequest<FlickrPhoto> = FlickrPhoto.fetchRequest()
@@ -82,9 +82,14 @@ class PhotoAlbumViewController: UIViewController {
     ///Sets photosURL to the ones obtained by flickr API, and reloads the collectionView to activate placeholder images.
     func getFlickrImagesURL(photos: [Photo], error: Error?){
         if error == nil {
+            if photos.count == 0{
+                self.noImagesLabel.isHidden = false
+            }
+            self.noImagesLabel.isHidden = true
             self.photosURL = photos
             self.collectionView.reloadData()
         }
+        activityViewIndicator.stopAnimating()
     }
     
     ///Handles the downloaded image and saves in CoreData DB.
@@ -103,6 +108,9 @@ class PhotoAlbumViewController: UIViewController {
     
     ///Configures MapView Region and Add Saved Pin as annotation.
     func setupMapView(){
+        
+        //Set mapView delegate to PhotoAlbumViewController
+        mapView.delegate = self
     
         var annotations = [MKPointAnnotation]()
                        
@@ -129,12 +137,19 @@ class PhotoAlbumViewController: UIViewController {
 
     }
     
+    ///Configures the CollectionFlowLayout and sets delegation and datasource for the CollectionView
+    fileprivate func setupCollectionView() {
+          collectionView.delegate = self
+          collectionView.dataSource = self
+          setCollectionFlowLayout()
+      }
+    
     ///Configures the CollectionView Flow layout for our items to fit accoarding to its content.
     func setCollectionFlowLayout() {
         
         let items: CGFloat = view.frame.size.width > view.frame.size.height ? 5.0 : 3.0
-        let space: CGFloat = 3.0
-        let dimension = (view.frame.size.width - ((items + 1) * space)) / items
+        let space: CGFloat = 1.0
+        let dimension = (view.frame.size.width - ((items + 1) * space)) / 2
         
         let layout = UICollectionViewFlowLayout()
         layout.sectionInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)

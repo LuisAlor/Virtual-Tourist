@@ -52,6 +52,23 @@
                                     <constraint firstAttribute="height" constant="150" id="hab-0h-9dW"/>
                                 </constraints>
                             </mapView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="5ma-yP-tDH">
+                                <rect key="frame" x="0.0" y="812" width="414" height="50"/>
+                                <state key="normal" title="New Collection"/>
+                                <connections>
+                                    <action selector="getNewCollection:" destination="egO-lh-LWS" eventType="touchUpInside" id="hUa-HG-uDs"/>
+                                </connections>
+                            </button>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="No Images Found" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="xYU-CE-qaM">
+                                <rect key="frame" x="139.5" y="492.5" width="135" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" style="large" translatesAutoresizingMaskIntoConstraints="NO" id="5WV-Fh-L5q">
+                                <rect key="frame" x="188.5" y="447" width="37" height="37"/>
+                                <color key="color" systemColor="systemRedColor" red="1" green="0.23137254900000001" blue="0.18823529410000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                            </activityIndicatorView>
                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="Vod-cU-sJc">
                                 <rect key="frame" x="0.0" y="194" width="414" height="618"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
@@ -90,18 +107,14 @@
                                     </collectionViewCell>
                                 </cells>
                             </collectionView>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="5ma-yP-tDH">
-                                <rect key="frame" x="0.0" y="812" width="414" height="50"/>
-                                <state key="normal" title="New Collection"/>
-                                <connections>
-                                    <action selector="getNewCollection:" destination="egO-lh-LWS" eventType="touchUpInside" id="hUa-HG-uDs"/>
-                                </connections>
-                            </button>
                         </subviews>
                         <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
                         <constraints>
                             <constraint firstItem="dXZ-Et-zwJ" firstAttribute="leading" secondItem="Rwv-e9-ecH" secondAttribute="leading" id="0GK-a6-Brz"/>
+                            <constraint firstItem="5WV-Fh-L5q" firstAttribute="centerX" secondItem="xYU-CE-qaM" secondAttribute="centerX" id="0bx-eH-GHt"/>
                             <constraint firstItem="Rwv-e9-ecH" firstAttribute="trailing" secondItem="5ma-yP-tDH" secondAttribute="trailing" id="5Yu-wX-sYk"/>
+                            <constraint firstItem="xYU-CE-qaM" firstAttribute="centerY" secondItem="Vod-cU-sJc" secondAttribute="centerY" id="Raj-QS-3iU"/>
+                            <constraint firstItem="xYU-CE-qaM" firstAttribute="top" secondItem="5WV-Fh-L5q" secondAttribute="bottom" constant="8.5" id="UnR-sh-MnC"/>
                             <constraint firstItem="dXZ-Et-zwJ" firstAttribute="top" secondItem="Rwv-e9-ecH" secondAttribute="top" id="XIC-WD-pzC"/>
                             <constraint firstItem="Rwv-e9-ecH" firstAttribute="bottom" secondItem="Vod-cU-sJc" secondAttribute="bottom" constant="50" id="bpt-sL-t0c"/>
                             <constraint firstItem="Vod-cU-sJc" firstAttribute="top" secondItem="dXZ-Et-zwJ" secondAttribute="bottom" id="dZd-cT-Tlz"/>
@@ -109,6 +122,7 @@
                             <constraint firstItem="Rwv-e9-ecH" firstAttribute="bottom" secondItem="5ma-yP-tDH" secondAttribute="bottom" id="fTe-L8-27q"/>
                             <constraint firstItem="Rwv-e9-ecH" firstAttribute="trailing" secondItem="dXZ-Et-zwJ" secondAttribute="trailing" id="h8N-4c-7Xb"/>
                             <constraint firstItem="Vod-cU-sJc" firstAttribute="leading" secondItem="Rwv-e9-ecH" secondAttribute="leading" id="hsS-gC-3mb"/>
+                            <constraint firstItem="xYU-CE-qaM" firstAttribute="centerX" secondItem="Vod-cU-sJc" secondAttribute="centerX" id="pFr-5K-1EP"/>
                             <constraint firstItem="5ma-yP-tDH" firstAttribute="top" secondItem="Vod-cU-sJc" secondAttribute="bottom" id="xXA-fJ-w0k"/>
                             <constraint firstItem="5ma-yP-tDH" firstAttribute="leading" secondItem="Rwv-e9-ecH" secondAttribute="leading" id="zXW-Kv-kp5"/>
                         </constraints>
@@ -116,9 +130,11 @@
                     </view>
                     <navigationItem key="navigationItem" id="SMe-HM-JPj"/>
                     <connections>
+                        <outlet property="activityViewIndicator" destination="5WV-Fh-L5q" id="jx8-wt-ehp"/>
                         <outlet property="collectionView" destination="Vod-cU-sJc" id="UHl-DN-53k"/>
                         <outlet property="mapView" destination="dXZ-Et-zwJ" id="Y1v-FG-zhR"/>
                         <outlet property="newCollection" destination="5ma-yP-tDH" id="uPS-By-LuW"/>
+                        <outlet property="noImagesLabel" destination="xYU-CE-qaM" id="AGA-Pp-oGt"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="ehY-PV-0iZ" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
