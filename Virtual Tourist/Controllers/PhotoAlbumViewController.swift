@@ -21,6 +21,7 @@ class PhotoAlbumViewController: UIViewController {
     var selectedPin: Pin!
     var fetchedResultsController: NSFetchedResultsController<FlickrPhoto>!
     var photosURL: [Photo] = []
+    var photosData: [Data] = []
     var blockOperations: [BlockOperation] = []
     
     override func viewDidLoad() {
@@ -49,6 +50,17 @@ class PhotoAlbumViewController: UIViewController {
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(true)
         fetchedResultsController = nil
+    }
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(true)
+        for photo in photosData {
+            let image = FlickrPhoto(context: CoreDataController.shared.viewContext)
+            image.imageFile = photo
+            image.pin = self.selectedPin
+        }
+        CoreDataController.shared.saveViewContext()
+        
     }
     
     ///Configures the Fetch Results controller to get saved photos.
@@ -150,7 +162,7 @@ class PhotoAlbumViewController: UIViewController {
         
         let items: CGFloat = view.frame.size.width > view.frame.size.height ? 5.0 : 3.0
         let space: CGFloat = 1.0
-        let dimension = (view.frame.size.width - ((items + 1) * space)) / 2
+        let dimension = (view.frame.size.width - ((items + 1) * space)) / items
         
         let layout = UICollectionViewFlowLayout()
         layout.sectionInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
@@ -290,7 +302,7 @@ extension PhotoAlbumViewController: UICollectionViewDelegate, UICollectionViewDa
                     FlickrClient.downloadImage(imageURL: URL(string: self.photosURL[indexPath.row].imageURL)!) { (data, error) in
                         if let data = data {
                             cell.imageView.image = UIImage(data: data)
-                            //Save to coreData???
+                            self.photosData.append(data)
                         }
                     }
                 }
