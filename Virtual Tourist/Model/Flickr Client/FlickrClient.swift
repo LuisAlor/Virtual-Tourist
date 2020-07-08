@@ -39,7 +39,6 @@ class FlickrClient {
     
     /// Generic Get Request usuable only inside FlickrClient
     private class func sendGETRequest<ResponseType: Decodable>(url: URL, response: ResponseType.Type, completionHandler: @escaping (ResponseType?,Error?) -> Void ){
-        print(url)
         let task = URLSession.shared.dataTask(with: url) { (data, response, error) in
             guard let data = data else {
                 DispatchQueue.main.async {

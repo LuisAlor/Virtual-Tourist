@@ -21,8 +21,8 @@ class PhotoAlbumViewController: UIViewController {
     var selectedPin: Pin!
     var fetchedResultsController: NSFetchedResultsController<FlickrPhoto>!
     var photosURL: [Photo] = []
-    var photosData: [Data] = []
     var blockOperations: [BlockOperation] = []
+    var flickrPhotos = [FlickrPhoto]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -38,8 +38,11 @@ class PhotoAlbumViewController: UIViewController {
         if !checkPinHasAlbum() {
             activityViewIndicator.startAnimating()
             FlickrClient.flickrGETSearchPhotos(lat: selectedPin.latitude, lon: selectedPin.longitude, completionHandler: getFlickrImagesURL(photos:error:))
+        }else{
+            if let objects = fetchedResultsController.fetchedObjects{
+                flickrPhotos = objects
+            }
         }
-        
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -50,17 +53,6 @@ class PhotoAlbumViewController: UIViewController {
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(true)
         fetchedResultsController = nil
-    }
-    
-    override func viewDidDisappear(_ animated: Bool) {
-        super.viewDidDisappear(true)
-        for photo in photosData {
-            let image = FlickrPhoto(context: CoreDataController.shared.viewContext)
-            image.imageFile = photo
-            image.pin = self.selectedPin
-        }
-        CoreDataController.shared.saveViewContext()
-        
     }
     
     ///Configures the Fetch Results controller to get saved photos.
@@ -93,30 +85,23 @@ class PhotoAlbumViewController: UIViewController {
     
     ///Sets photosURL to the ones obtained by flickr API, and reloads the collectionView to activate placeholder images.
     func getFlickrImagesURL(photos: [Photo], error: Error?){
+        
         if error == nil {
-            if photos.count == 0{
-                self.noImagesLabel.isHidden = false
-            } else {
-                self.photosURL = photos
+            if photos.count != 0 {
                 self.noImagesLabel.isHidden = true
-                self.collectionView.reloadData()
+                for photo in photos {
+                    let image = FlickrPhoto(context: CoreDataController.shared.viewContext)
+                    image.pin = self.selectedPin
+                    flickrPhotos.append(image)
+                    self.photosURL.append(photo)
+                }
+            } else {
+                self.noImagesLabel.isHidden = false
             }
         }
+        self.collectionView.reloadData()
+        CoreDataController.shared.saveViewContext()
         activityViewIndicator.stopAnimating()
-    }
-    
-    ///Handles the downloaded image and saves in CoreData DB.
-    func downloadFlickrImagesHandler(data: Data?, error: Error?){
-        let imageToSave = FlickrPhoto(context: CoreDataController.shared.viewContext)
-        if let data = data {
-            //Set the imageFile to the picture downloaded
-            imageToSave.imageFile = data
-            //Select to what pin this image corresponds
-            imageToSave.pin = selectedPin
-            //Save to coreData DB
-            CoreDataController.shared.saveViewContext()
-            self.collectionView.reloadData()
-        }
     }
     
     ///Configures MapView Region and Add Saved Pin as annotation.
@@ -175,7 +160,8 @@ class PhotoAlbumViewController: UIViewController {
     
     ///Gets a new collection of photos (deletes previous ones from persistent store).
     @IBAction func getNewCollection(_ sender: UIButton?){
-        //TO-DO
+        
+        flickrPhotos = []
         if let  objects = fetchedResultsController.fetchedObjects{
             for object in objects{
                 CoreDataController.shared.viewContext.delete(object)
@@ -268,7 +254,6 @@ extension PhotoAlbumViewController: NSFetchedResultsControllerDelegate{
                 self.blockOperations.removeAll(keepingCapacity: false)
         })
     }
-
 }
 
 extension PhotoAlbumViewController: UICollectionViewDelegate, UICollectionViewDataSource{
@@ -277,47 +262,38 @@ extension PhotoAlbumViewController: UICollectionViewDelegate, UICollectionViewDa
         return fetchedResultsController.sections?.count ?? 1
     }
 
-    
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        if checkPinHasAlbum(){
-            return fetchedResultsController.sections?[section].numberOfObjects ?? 0
-        } else {
-            return photosURL.count
-        }
+        return flickrPhotos.count
     }
-    
         
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
        
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "PhotoCollectionViewCell", for: indexPath) as! PhotoCollectionViewCell
-                
-        if checkPinHasAlbum() {
-            let object = fetchedResultsController.object(at: indexPath)
-            if let flickrPhoto = object.imageFile {
-                cell.imageView.image = UIImage(data: flickrPhoto)
-            }
+            
+        if flickrPhotos[indexPath.row].imageFile != nil {
+            cell.imageView.image = UIImage(data: flickrPhotos[indexPath.row].imageFile!)
         } else {
             cell.imageView.image = UIImage(named: "photo_placeholder")
-            DispatchQueue.global().async {
+            DispatchQueue.main.async {
                     FlickrClient.downloadImage(imageURL: URL(string: self.photosURL[indexPath.row].imageURL)!) { (data, error) in
                         if let data = data {
                             cell.imageView.image = UIImage(data: data)
-                            self.photosData.append(data)
+                            self.flickrPhotos[indexPath.row].imageFile = data
+                            CoreDataController.shared.saveViewContext()
                         }
                     }
                 }
             }
-            
             return cell
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         //Select from indexPath which object from CollectionView should be deleted from persistent store
         let objectToDelete = fetchedResultsController.object(at: indexPath)
+        flickrPhotos.remove(at: indexPath.row)
         CoreDataController.shared.viewContext.delete(objectToDelete)
         CoreDataController.shared.saveViewContext()
     }
-        
 }
 
 extension PhotoAlbumViewController: MKMapViewDelegate{
