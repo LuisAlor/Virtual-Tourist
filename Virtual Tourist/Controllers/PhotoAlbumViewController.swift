@@ -37,6 +37,7 @@ class PhotoAlbumViewController: UIViewController {
         
         if !checkPinHasAlbum() {
             activityViewIndicator.startAnimating()
+            newCollection.isEnabled = false
             FlickrClient.flickrGETSearchPhotos(lat: selectedPin.latitude, lon: selectedPin.longitude, completionHandler: getFlickrImagesURL(photos:error:))
         }else{
             if let objects = fetchedResultsController.fetchedObjects{
@@ -162,6 +163,7 @@ class PhotoAlbumViewController: UIViewController {
     @IBAction func getNewCollection(_ sender: UIButton?){
         
         flickrPhotos = []
+        photosURL = []
         if let  objects = fetchedResultsController.fetchedObjects{
             for object in objects{
                 CoreDataController.shared.viewContext.delete(object)
@@ -274,7 +276,7 @@ extension PhotoAlbumViewController: UICollectionViewDelegate, UICollectionViewDa
             cell.imageView.image = UIImage(data: flickrPhotos[indexPath.row].imageFile!)
         } else {
             cell.imageView.image = UIImage(named: "photo_placeholder")
-            DispatchQueue.main.async {
+            DispatchQueue.global().async {
                     FlickrClient.downloadImage(imageURL: URL(string: self.photosURL[indexPath.row].imageURL)!) { (data, error) in
                         if let data = data {
                             cell.imageView.image = UIImage(data: data)
