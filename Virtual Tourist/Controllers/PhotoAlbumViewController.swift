@@ -29,10 +29,10 @@ class PhotoAlbumViewController: UIViewController {
         setupCollectionView()
         setupFetchedResultsController()
         setupMapView()
-        
-        noImagesLabel.isHidden = false
+                
         //Hide activity indicatory when stops
         activityViewIndicator.hidesWhenStopped = true
+        noImagesLabel.isHidden = true
         
         if !checkPinHasAlbum() {
             activityViewIndicator.startAnimating()
@@ -84,10 +84,11 @@ class PhotoAlbumViewController: UIViewController {
         if error == nil {
             if photos.count == 0{
                 self.noImagesLabel.isHidden = false
+            } else {
+                self.photosURL = photos
+                self.noImagesLabel.isHidden = true
+                self.collectionView.reloadData()
             }
-            self.noImagesLabel.isHidden = true
-            self.photosURL = photos
-            self.collectionView.reloadData()
         }
         activityViewIndicator.stopAnimating()
     }
@@ -285,18 +286,11 @@ extension PhotoAlbumViewController: UICollectionViewDelegate, UICollectionViewDa
             }
         } else {
             cell.imageView.image = UIImage(named: "photo_placeholder")
-            DispatchQueue.main.async {
+            DispatchQueue.global().async {
                     FlickrClient.downloadImage(imageURL: URL(string: self.photosURL[indexPath.row].imageURL)!) { (data, error) in
-                        let imageToSave = FlickrPhoto(context: CoreDataController.shared.viewContext)
                         if let data = data {
                             cell.imageView.image = UIImage(data: data)
-                            //Set the imageFile to the picture downloaded
-                            imageToSave.imageFile = data
-                            //Select to what pin this image corresponds
-                            imageToSave.pin = self.selectedPin
-                            //Save to coreData DB
-                            CoreDataController.shared.saveViewContext()
-                            self.collectionView.reloadData()
+                            //Save to coreData???
                         }
                     }
                 }
