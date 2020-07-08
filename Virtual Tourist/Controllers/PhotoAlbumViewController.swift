@@ -91,10 +91,13 @@ class PhotoAlbumViewController: UIViewController {
             if photos.count != 0 {
                 self.noImagesLabel.isHidden = true
                 for photo in photos {
-                    let image = FlickrPhoto(context: CoreDataController.shared.viewContext)
-                    image.pin = self.selectedPin
-                    flickrPhotos.append(image)
-                    self.photosURL.append(photo)
+                    // Sometime the image may not contain imageURL, if so do not append!
+                    if photo.imageURL != nil {
+                        let image = FlickrPhoto(context: CoreDataController.shared.viewContext)
+                        image.pin = self.selectedPin
+                        flickrPhotos.append(image)
+                        self.photosURL.append(photo)
+                    }
                 }
             } else {
                 self.noImagesLabel.isHidden = false
@@ -164,12 +167,12 @@ class PhotoAlbumViewController: UIViewController {
         
         flickrPhotos = []
         photosURL = []
+    
         if let  objects = fetchedResultsController.fetchedObjects{
             for object in objects{
                 CoreDataController.shared.viewContext.delete(object)
             }
             CoreDataController.shared.saveViewContext()
-
             FlickrClient.flickrGETSearchPhotos(lat: selectedPin.latitude, lon: selectedPin.longitude, completionHandler: getFlickrImagesURL(photos:error:))
         }
     }
@@ -277,7 +280,7 @@ extension PhotoAlbumViewController: UICollectionViewDelegate, UICollectionViewDa
         } else {
             cell.imageView.image = UIImage(named: "photo_placeholder")
             DispatchQueue.global().async {
-                    FlickrClient.downloadImage(imageURL: URL(string: self.photosURL[indexPath.row].imageURL)!) { (data, error) in
+                FlickrClient.downloadImage(imageURL: URL(string: self.photosURL[indexPath.row].imageURL!)!) { (data, error) in
                         if let data = data {
                             cell.imageView.image = UIImage(data: data)
                             self.flickrPhotos[indexPath.row].imageFile = data
@@ -286,6 +289,9 @@ extension PhotoAlbumViewController: UICollectionViewDelegate, UICollectionViewDa
                     }
                 }
             }
+        if flickrPhotos.count ==  photosURL.count{
+            newCollection.isEnabled = true
+        }
             return cell
     }
     
