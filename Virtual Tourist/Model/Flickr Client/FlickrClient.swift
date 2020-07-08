@@ -28,7 +28,7 @@ class FlickrClient {
             //searchPhotos API Method flickr.photos.search
             case let .searchPhotos(latitude, longitude):
                 return Endpoints.baseURL + "flickr.photos.search&" + "api_key=\(FlickrClient.apiKey)&" + "sort=date-posted-asc&" +
-                    "&privacy_filter=1" + "media=photos&" + "lat=\(latitude)&lon=\(longitude)&" + "extras=url_m&" + "per_page=10&" + "page=\(Int.random(in: 0..<100000))&" + "format=json&nojsoncallback=1"
+                    "&privacy_filter=1" + "media=photos&" + "lat=\(latitude)&lon=\(longitude)&" + "extras=url_m&" + "per_page=10&" + "page=\(Int.random(in: 0..<100))&" + "format=json&nojsoncallback=1"
             }
         }
         // Return from our generated URL type string to URL
@@ -39,7 +39,7 @@ class FlickrClient {
     
     /// Generic Get Request usuable only inside FlickrClient
     private class func sendGETRequest<ResponseType: Decodable>(url: URL, response: ResponseType.Type, completionHandler: @escaping (ResponseType?,Error?) -> Void ){
-        
+        print(url)
         let task = URLSession.shared.dataTask(with: url) { (data, response, error) in
             guard let data = data else {
                 DispatchQueue.main.async {

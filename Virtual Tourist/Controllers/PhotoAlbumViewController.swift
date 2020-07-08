@@ -27,6 +27,8 @@ class PhotoAlbumViewController: UIViewController {
         collectionView.delegate = self
         collectionView.dataSource = self
         
+        setCollectionFlowLayout()
+        
         //Set mapView delegate to PhotoAlbumViewController
         mapView.delegate = self
         
@@ -49,7 +51,7 @@ class PhotoAlbumViewController: UIViewController {
         fetchedResultsController = nil
     }
     
-    /// Configures the Fetch Results controller to get saved photos
+    /// Configures the Fetch Results controller to get saved photos.
     fileprivate func setupFetchedResultsController() {
         //Fetch Request Setup
         let fetchRequest: NSFetchRequest<FlickrPhoto> = FlickrPhoto.fetchRequest()
@@ -67,6 +69,7 @@ class PhotoAlbumViewController: UIViewController {
         try? fetchedResultsController.performFetch()
     }
     
+    ///Checks if th pin already contains an album from the persistent store.
     func checkPinHasAlbum() -> Bool {
         if let photosFetched = fetchedResultsController.fetchedObjects{
             if !photosFetched.isEmpty{
@@ -76,6 +79,7 @@ class PhotoAlbumViewController: UIViewController {
         return false
     }
     
+    ///Sets photosURL to the ones obtained by flickr API, and reloads the collectionView to activate placeholder images.
     func getFlickrImagesURL(photos: [Photo], error: Error?){
         if error == nil {
             self.photosURL = photos
@@ -83,7 +87,7 @@ class PhotoAlbumViewController: UIViewController {
         }
     }
     
-    ///Handles the downloaded image and saves in CoreData DB
+    ///Handles the downloaded image and saves in CoreData DB.
     func downloadFlickrImagesHandler(data: Data?, error: Error?){
         let imageToSave = FlickrPhoto(context: CoreDataController.shared.viewContext)
         if let data = data {
@@ -125,6 +129,23 @@ class PhotoAlbumViewController: UIViewController {
 
     }
     
+    ///Configures the CollectionView Flow layout for our items to fit accoarding to its content.
+    func setCollectionFlowLayout() {
+        
+        let items: CGFloat = view.frame.size.width > view.frame.size.height ? 5.0 : 3.0
+        let space: CGFloat = 3.0
+        let dimension = (view.frame.size.width - ((items + 1) * space)) / items
+        
+        let layout = UICollectionViewFlowLayout()
+        layout.sectionInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
+        layout.minimumLineSpacing = 8.0 - items
+        layout.minimumInteritemSpacing = space
+        layout.itemSize = CGSize(width: dimension, height: dimension)
+        
+        collectionView.collectionViewLayout = layout
+    }
+    
+    ///Gets a new collection of photos (deletes previous ones from persistent store).
     @IBAction func getNewCollection(_ sender: UIButton?){
         //TO-DO
         if let  objects = fetchedResultsController.fetchedObjects{
@@ -178,10 +199,10 @@ extension PhotoAlbumViewController: NSFetchedResultsControllerDelegate{
             )
         }
     }
-    public func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange sectionInfo: NSFetchedResultsSectionInfo, atSectionIndex sectionIndex: Int, for type: NSFetchedResultsChangeType) {
+    
+    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange sectionInfo: NSFetchedResultsSectionInfo, atSectionIndex sectionIndex: Int, for type: NSFetchedResultsChangeType) {
         
         if type == NSFetchedResultsChangeType.insert {
-            print("Insert Section: \(sectionIndex)")
             
             blockOperations.append(
                 BlockOperation(block: { [weak self] in
@@ -192,7 +213,6 @@ extension PhotoAlbumViewController: NSFetchedResultsControllerDelegate{
             )
         }
         else if type == NSFetchedResultsChangeType.update {
-            print("Update Section: \(sectionIndex)")
             blockOperations.append(
                 BlockOperation(block: { [weak self] in
                     if let this = self {
@@ -202,8 +222,6 @@ extension PhotoAlbumViewController: NSFetchedResultsControllerDelegate{
             )
         }
         else if type == NSFetchedResultsChangeType.delete {
-            print("Delete Section: \(sectionIndex)")
-            
             blockOperations.append(
                 BlockOperation(block: { [weak self] in
                     if let this = self {
@@ -252,10 +270,18 @@ extension PhotoAlbumViewController: UICollectionViewDelegate, UICollectionViewDa
             }
         } else {
             cell.imageView.image = UIImage(named: "photo_placeholder")
-            DispatchQueue.global().async {
+            DispatchQueue.main.async {
                     FlickrClient.downloadImage(imageURL: URL(string: self.photosURL[indexPath.row].imageURL)!) { (data, error) in
+                        let imageToSave = FlickrPhoto(context: CoreDataController.shared.viewContext)
                         if let data = data {
                             cell.imageView.image = UIImage(data: data)
+                            //Set the imageFile to the picture downloaded
+                            imageToSave.imageFile = data
+                            //Select to what pin this image corresponds
+                            imageToSave.pin = self.selectedPin
+                            //Save to coreData DB
+                            CoreDataController.shared.saveViewContext()
+                            self.collectionView.reloadData()
                         }
                     }
                 }
@@ -268,6 +294,7 @@ extension PhotoAlbumViewController: UICollectionViewDelegate, UICollectionViewDa
         //Select from indexPath which object from CollectionView should be deleted from persistent store
         let objectToDelete = fetchedResultsController.object(at: indexPath)
         CoreDataController.shared.viewContext.delete(objectToDelete)
+        CoreDataController.shared.saveViewContext()
     }
         
 }
