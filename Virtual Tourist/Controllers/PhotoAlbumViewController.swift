@@ -127,6 +127,14 @@ class PhotoAlbumViewController: UIViewController {
     
     @IBAction func getNewCollection(_ sender: UIButton?){
         //TO-DO
+        if let  objects = fetchedResultsController.fetchedObjects{
+            for object in objects{
+                CoreDataController.shared.viewContext.delete(object)
+            }
+            CoreDataController.shared.saveViewContext()
+
+            FlickrClient.flickrGETSearchPhotos(lat: selectedPin.latitude, lon: selectedPin.longitude, completionHandler: getFlickrImagesURL(photos:error:))
+        }
     }
 }
 
@@ -244,10 +252,16 @@ extension PhotoAlbumViewController: UICollectionViewDelegate, UICollectionViewDa
             }
         } else {
             cell.imageView.image = UIImage(named: "photo_placeholder")
-            FlickrClient.downloadImage(imageURL:  URL(string: photosURL[indexPath.row].imageURL)!, completionHandler: downloadFlickrImagesHandler(data:error:))
-        }
-        
-        return cell
+            DispatchQueue.global().async {
+                    FlickrClient.downloadImage(imageURL: URL(string: self.photosURL[indexPath.row].imageURL)!) { (data, error) in
+                        if let data = data {
+                            cell.imageView.image = UIImage(data: data)
+                        }
+                    }
+                }
+            }
+            
+            return cell
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
