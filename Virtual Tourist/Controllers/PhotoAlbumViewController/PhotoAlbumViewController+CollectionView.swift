@@ -33,11 +33,13 @@ extension PhotoAlbumViewController: UICollectionViewDelegate, UICollectionViewDa
                             cell.imageView.image = UIImage(data: data)
                             self.flickrPhotos[indexPath.row].imageFile = data
                             CoreDataController.shared.saveViewContext()
+                            if self.fetchedResultsController.fetchedObjects?.count == self.flickrPhotos.count{
+                                self.newCollection.isEnabled = true
+                            }
                         }
                     }
                 }
             }
-        
             return cell
     }
     

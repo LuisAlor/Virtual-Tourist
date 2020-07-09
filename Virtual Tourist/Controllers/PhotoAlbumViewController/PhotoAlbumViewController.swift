@@ -12,12 +12,14 @@ import MapKit
 
 class PhotoAlbumViewController: UIViewController {
     
+    //IBOUtlets
     @IBOutlet weak var collectionView: UICollectionView!
     @IBOutlet weak var mapView: MKMapView!
     @IBOutlet weak var newCollection: UIButton!
     @IBOutlet weak var activityViewIndicator: UIActivityIndicatorView!
     @IBOutlet weak var noImagesLabel: UILabel!
     
+    //Properties
     var selectedPin: Pin!
     var fetchedResultsController: NSFetchedResultsController<FlickrPhoto>!
     var photosURL: [Photo] = []
@@ -33,17 +35,9 @@ class PhotoAlbumViewController: UIViewController {
                 
         //Hide activity indicatory when stops
         activityViewIndicator.hidesWhenStopped = true
+        //Hide label
         noImagesLabel.isHidden = true
-        
-        if !checkPinHasAlbum() {
-            activityViewIndicator.startAnimating()
-            newCollection.isEnabled = false
-            FlickrClient.flickrGETSearchPhotos(lat: selectedPin.latitude, lon: selectedPin.longitude, completionHandler: getFlickrImagesURL(photos:error:))
-        }else{
-            if let objects = fetchedResultsController.fetchedObjects{
-                flickrPhotos = objects
-            }
-        }
+        setupAlbumLogic()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -54,6 +48,19 @@ class PhotoAlbumViewController: UIViewController {
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(true)
         fetchedResultsController = nil
+    }
+    
+    ///Configures the album logic according to the data stored if has it.
+    fileprivate func setupAlbumLogic() {
+        if !checkPinHasAlbum() {
+            activityViewIndicator.startAnimating()
+            newCollection.isEnabled = false
+            FlickrClient.flickrGETSearchPhotos(lat: selectedPin.latitude, lon: selectedPin.longitude, completionHandler: getFlickrImagesURL(photos:error:))
+        }else{
+            if let objects = fetchedResultsController.fetchedObjects{
+                flickrPhotos = objects
+            }
+        }
     }
     
     ///Configures the Fetch Results controller to get saved photos.
@@ -168,6 +175,7 @@ class PhotoAlbumViewController: UIViewController {
         
         flickrPhotos = []
         photosURL = []
+        newCollection.isEnabled = false
     
         if let  objects = fetchedResultsController.fetchedObjects{
             for object in objects{

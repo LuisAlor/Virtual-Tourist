@@ -11,6 +11,7 @@ import Foundation
 /// Structure of flickr.photos.search's method of "Photo"
 struct Photo: Codable {
     
+    //Optional since url_m can be empty and cause parsing issues
     let imageURL: String?
     
     enum CodingKeys: String, CodingKey{
